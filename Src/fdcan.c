@@ -190,7 +190,8 @@ void CAN1_0x1FF_TX(int16_t motor1, int16_t motor2, int16_t motor3, int16_t motor
 	
 }
 
-
+float Buffer_power=60;
+int cnt200=0;
 void HAL_CAN_RxFifo0MsgPendingCallback(FDCAN_HandleTypeDef *hcan)
 {
   FDCAN_RxHeaderTypeDef CAN_RX;
@@ -201,7 +202,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(FDCAN_HandleTypeDef *hcan)
 		switch(CAN_RX.Identifier)
 		{
     	case 0x333://supercap
+							cnt200++;
         cap.Bat_V=(float)((int16_t)(Data[0]<<8|Data[1]));
+				Buffer_power=(float)((int16_t)(Data[2]<<8|Data[3]));
 			break; 
 			default: {break;}	
 		}

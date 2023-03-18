@@ -53,7 +53,7 @@ float AD_Value1;
 extern uint32_t adc_value[1];
 float Vcc_Battery;
 float Vcc_Output;
-
+extern float Buffer_power;
 float dac_out=0;
 
 extern struct supercap cap;
@@ -138,7 +138,7 @@ void Thread_Transfer(void const * argument)
 		Transfer_data[1] = INA219_D.Power;
 		Transfer_data[2] = 0;
 */
-    osDelay(1);
+    osDelay(10);
   }
   /* USER CODE END Thread_Transfer */
 }
@@ -168,6 +168,9 @@ void Thread_Vcc(void const * argument)
 * @retval None
 */
 int cnt10=0;
+int cnt12=0;
+int cnt13=0;
+int Target_power=40;
 /* USER CODE END Header_Thread_Control */
 void Thread_Control(void const * argument)
 {
@@ -192,12 +195,19 @@ void Thread_Control(void const * argument)
 		HAL_ADC_Start_DMA(&hadc1,adc_value,1);//开启ADC的DMA接收
 		Vcc_Battery = adc_value[0]*3.3f/4096.0f*10;
 			
-			
-		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_SET);
+//		if(Buffer_power>10)	Target_power=cap.Bat_V+5;
+//		else if(Buffer_power<10)	Target_power=cap.Bat_V-8;
+		
+		
+		if(cnt10>20)
+		{
+			HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_5);
+			HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_6);
+			cnt10=0;
+		}
 		
 		dac_out=(cap.Bat_V)*0.2/Vcc_Battery;
-		if(dac_out>1) dac_out=1;
+		if(dac_out>1.2) dac_out=1.2;
 		dac_out=dac_out/3.3*4095;
     HAL_DAC_SetValue(&hdac1,DAC_CHANNEL_2,DAC_ALIGN_12B_R,dac_out);
     osDelay(10);
