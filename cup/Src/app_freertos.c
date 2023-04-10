@@ -126,13 +126,15 @@ void MX_FREERTOS_Init(void) {
   * @retval None
   */
 /* USER CODE END Header_Thread_Transfer */
+int cnt2155=0;
 void Thread_Transfer(void const * argument)
 {
   /* USER CODE BEGIN Thread_Transfer */
   /* Infinite loop */
   for(;;)
   {
-		CAN1_0x1FF_TX(INA219_D.Voltage,INA219_D.Power,Vcc_Battery,Vcc_Battery);
+		CAN1_0x1FF_TX((INA219_D.Voltage)*100,(INA219_D.Power)*100,(Vcc_Battery)*100,Vcc_Battery);
+		cnt2155++;
     /*
 		Transfer_data[0] = INA219_D.Voltage;
 		Transfer_data[1] = INA219_D.Power;
@@ -182,7 +184,7 @@ void Thread_Control(void const * argument)
 		INA_GET_Current_MA();//获取当前电流
 		INA_GET_Power_MW();//获取当前功率
 
-		/*
+		
 		HAL_ADC_Start(&hadc1);//启动adc转换
 		HAL_ADC_PollForConversion(&hadc1, 0);//等待转换完成，第二个参数表示超时时间，单位ms
 		if(HAL_IS_BIT_SET(HAL_ADC_GetState(&hadc1), HAL_ADC_STATE_REG_EOC))//
@@ -191,23 +193,24 @@ void Thread_Control(void const * argument)
 				AD_Value1=(float)AD_Value*33/4096;
 				cnt10++;
 			}
-		*/
+		
+			
+			
 		HAL_ADC_Start_DMA(&hadc1,adc_value,1);//开启ADC的DMA接收
 		Vcc_Battery = adc_value[0]*3.3f/4096.0f*10;
-			
 //		if(Buffer_power>10)	Target_power=cap.Bat_V+5;
 //		else if(Buffer_power<10)	Target_power=cap.Bat_V-8;
 		
 		
-		if(cnt10>20)
+		if(cnt10>3)
 		{
 			HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_5);
 			HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_6);
 			cnt10=0;
 		}
 		
-		dac_out=(cap.Bat_V)*0.2/Vcc_Battery;
-		if(dac_out>1.2) dac_out=1.2;
+		dac_out=(cap.Bat_V-1)*0.2/Vcc_Battery;
+		if(dac_out>1.6) dac_out=1.6;
 		dac_out=dac_out/3.3*4095;
     HAL_DAC_SetValue(&hdac1,DAC_CHANNEL_2,DAC_ALIGN_12B_R,dac_out);
     osDelay(10);

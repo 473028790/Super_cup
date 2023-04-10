@@ -33,7 +33,7 @@ extern "C" {
 /* USER CODE END Includes */
 
 extern FDCAN_HandleTypeDef hfdcan1;
-extern struct supercap cap;
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
